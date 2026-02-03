@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Controle de Gastos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121212">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #fff;
+    padding: 20px;
+}
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+}
+h1 { text-align: center; }
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 5px;
+    border: none;
+}
+input { background: #2a2a2a; color: #fff; }
+button {
+    background: #4caf50;
+    color: #fff;
+    font-weight: bold;
+}
+.despesa {
+    display: flex;
+    justify-content: space-between;
+    background: #2a2a2a;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+.remover { color: #ff5252; }
+.resultado { margin-top: 15px; text-align: center; font-size: 18px; }
+.positivo { color: #4caf50; }
+.negativo { color: #ff5252; }
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>💸 Controle de Gastos</h1>
+
+<input id="salario" type="number" placeholder="Salário">
+
+<hr>
+
+<input id="nomeDespesa" placeholder="Nome da despesa">
+<input id="valorDespesa" type="number" placeholder="Valor">
+<button onclick="add()">Adicionar</button>
+
+<div id="lista"></div>
+<div id="resultado" class="resultado"></div>
+</div>
+
+<script>
+let despesas = JSON.parse(localStorage.getItem("despesas")) || [];
+
+function add(){
+    let n = nomeDespesa.value;
+    let v = parseFloat(valorDespesa.value);
+    if(!n || !v) return;
+    despesas.push({n,v});
+    localStorage.setItem("despesas", JSON.stringify(despesas));
+    nomeDespesa.value="";
+    valorDespesa.value="";
+    render();
+}
+
+function del(i){
+    despesas.splice(i,1);
+    localStorage.setItem("despesas", JSON.stringify(despesas));
+    render();
+}
+
+function render(){
+    lista.innerHTML="";
+    let total=0;
+    despesas.forEach((d,i)=>{
+        total+=d.v;
+        lista.innerHTML+=`<div class="despesa">
+        ${d.n} - R$ ${d.v.toFixed(2)}
+        <span class="remover" onclick="del(${i})">❌</span>
+        </div>`;
+    });
+    let s=parseFloat(salario.value)||0;
+    let r=s-total;
+    resultado.innerHTML=s?
+    `Total: R$ ${total.toFixed(2)}<br>
+    <b class="${r>=0?'positivo':'negativo'}">
+    ${r>=0?'Sobra':'Falta'}: R$ ${r.toFixed(2)}</b>`:"";
+}
+salario.oninput=render;
+render();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
